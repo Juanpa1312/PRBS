@@ -37,8 +37,8 @@ module PRBS_Variable(
     );
 
 //Registro para los flip-flops del PRBS   
-reg [0:29] shift_reg = 30'b000000000000000000000000000000;
-
+// reg [0:29] shift_reg = 30'b000000000000000000000000000000;
+reg shift_reg [0:29] = Semilla [0:29];
 /*
 //Selector de MUX A (Salida/Longitud Variable)
 always@(*)
@@ -68,48 +68,51 @@ always @(posedge Clk)
 begin
     //Entra la condición solo si el reset tiene un valor de 0
     //Si no se cumple la condición el sistema simplemente deja de funcionar
-    if(Reset == 1'b0)begin
+    if (Reset == 1'b1)begin
+        shiftreg = Semilla[0:29];
+    end
+    else begin
+    
+    //if(Reset == 1'b0)begin
         //Condición para inicializar la semilla, solo se da en el primer ciclo
-        if (shift_reg[0:29] == 30'b000000000000000000000000000000)
-        begin
+        //if (shift_reg[0:29] == 30'b000000000000000000000000000000)
+        //begin
             //Se inicializa la semilla
-            shift_reg [0:29] = Semilla [0:29];
+            //shift_reg [0:29] = Semilla [0:29];
+        //end
+        //else begin
+        //Se aplica shitf left al registro shift_reg para mover un dato a la izquierda
+        shift_reg[0:29] = shift_reg >> 1;
+        
+        //Combinación Lógica de selección para Salida y el nuevo primer elemento de de shift_reg (shift_reg[0])
+        if(Longitud == 2'b00)
+        begin
+            //Estado S1: Longitud -> 00
+            //Opción #1 -> x^30
+            Salida = shift_reg[29];
+            //Opción #1 -> XOR (x^30)^(x^20)
+            shift_reg[0] = (shift_reg[29] ^ shift_reg[19]);
+        end
+        else if(Longitud == 2'b01)
+        begin
+            //Estado S2: Longitud -> 01
+            //Opción #2 -> x^25
+            Salida = shift_reg[24];
+            //Opción #2 -> XOR (x^25)^(x^15)
+            shift_reg[0] = (shift_reg[24] ^ shift_reg[14]);
         end
         else begin
-            //Se aplica shitf left al registro shift_reg para mover un dato a la izquierda
-            shift_reg[0:29] = shift_reg >> 1;
-            
-            //Combinación Lógica de selección para Salida y el nuevo primer elemento de de shift_reg (shift_reg[0])
-            if(Longitud == 2'b00)
-            begin
-                //Estado S1: Longitud -> 00
-                //Opción #1 -> x^30
-                Salida = shift_reg[29];
-                //Opción #1 -> XOR (x^30)^(x^20)
-                shift_reg[0] = (shift_reg[29] ^ shift_reg[19]);
-            end
-            else if(Longitud == 2'b01)
-            begin
-                //Estado S2: Longitud -> 01
-                //Opción #2 -> x^25
-                Salida = shift_reg[24];
-                //Opción #2 -> XOR (x^25)^(x^15)
-                shift_reg[0] = (shift_reg[24] ^ shift_reg[14]);
-            end
-            else begin
-                /*
-                //Estado S3: Longitud -> 10, 11 (Estado no deseado)
-                //Opción #3 -> x^30
-                Salida = shift_reg[19];
-                //Opción #3 -> XOR (x^20)^(x^10)
-                shift_reg[0] = (shift_reg[19] ^ shift_reg[9]);
-                */
+            /*
+            //Estado S3: Longitud -> 10, 11 (Estado no deseado)
+            //Opción #3 -> x^30
+            Salida = shift_reg[19];
+            //Opción #3 -> XOR (x^20)^(x^10)
+            shift_reg[0] = (shift_reg[19] ^ shift_reg[9]);
+            */
                 
-                Salida = shift_reg[5];
-                shift_reg[0] = (shift_reg[5] ^ shift_reg[3]);
-            end
-            
-        end 
+            Salida = shift_reg[5];
+            shift_reg[0] = (shift_reg[5] ^ shift_reg[3]);
+        end
     end
 end
 endmodule
