@@ -69,7 +69,7 @@ begin
     //Entra la condición solo si el reset tiene un valor de 0
     //Si no se cumple la condición el sistema simplemente deja de funcionar
     if (Reset == 1'b1)begin
-        shiftreg = Semilla[0:29];
+        shiftreg[0:29] = Semilla[0:29];
     end
     else begin
     
